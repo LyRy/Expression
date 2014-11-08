@@ -59,7 +59,7 @@ public class TextDemo {
  
         //Create a scrolled text area.
         output = new JTextArea(5, 30);
-        output.setEditable(false);
+        output.setEditable(true);
         scrollPane = new JScrollPane(output);
  
         //Add the text area to the content pane.
