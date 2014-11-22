@@ -1,0 +1,232 @@
+/**
+ * Lydia Ryam - diabalyeku@yahoo.com
+ * Overview: A user interface for text editor
+ * Input: None
+ * Output: Text Editor display
+ * Variables: fullpath,FrameTitle, filename, frame;
+ * Plan:
+ * 1.	User runs the program
+ * 2.	Text Editor is displayed
+ * 3.	User can open new file, type, saveAs, save and exit
+ * 
+ * @author Lydia
+ *
+ */
+
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
+
+import javax.swing.*;
+
+//ActionListener listens for menu pick
+
+public class TextDemo extends JFrame implements ActionListener
+{
+	JTextArea output; // Declare Text are to hold the text
+	JScrollPane scrollPane;// Declare scroll pane to hold the test area
+	static String FrameTitle = "Expression", filename, fullpath;
+	static JFrame frame; // Frame to hold other containers
+
+	public JMenuBar createMenuBar() {
+		JMenuBar menuBar; //Menu bar that holds the menu items
+		JMenu menu; // Menu item like File, Edit etc
+		JMenuItem menuItem;
+		// Create the menu bar.
+		menuBar = new JMenuBar();
+		// Build the first menu.
+		menu = new JMenu("File");
+		menuBar.add(menu);
+		// a group of JMenuItems
+		menuItem = new JMenuItem("New");
+		menu.add(menuItem);
+		
+		menuItem.setMnemonic(KeyEvent.VK_C); // add internal name for action event
+		menuItem.addActionListener(this);
+		menuItem = new JMenuItem("Open");
+		menu.add(menuItem);
+		menuItem.setMnemonic(KeyEvent.VK_A);
+		menuItem.addActionListener(this);
+		menu.addSeparator();
+		menuItem = new JMenuItem("Save");
+		menu.add(menuItem);
+		menuItem.setMnemonic(KeyEvent.VK_D);
+		menuItem.addActionListener(this);
+		menuItem = new JMenuItem("Save As");
+		menu.add(menuItem);
+		menuItem.setMnemonic(KeyEvent.VK_B);
+		menuItem.addActionListener(this);
+
+		menu.addSeparator();
+		menuItem = new JMenuItem("Print");
+		menu.add(menuItem);
+		menuItem.setMnemonic(KeyEvent.VK_F);
+		menuItem.addActionListener(this);
+		menu.addSeparator();
+		menuItem = new JMenuItem("Exit");
+		menu.add(menuItem);
+		menuItem.setMnemonic(KeyEvent.VK_E);
+		menuItem.addActionListener(this);
+		menu = new JMenu("Edit");
+		menuBar.add(menu);
+		menuItem = new JMenuItem("Undo");
+		menu.add(menuItem);
+		menu.addSeparator();
+		menuItem = new JMenuItem("Copy");
+		menu.add(menuItem);
+		menuItem = new JMenuItem("Paste");
+		menu.add(menuItem);
+		menu.addSeparator();
+		menuItem = new JMenuItem("Find");
+		menu.add(menuItem);
+
+		menu = new JMenu("About");
+		menuBar.add(menu);
+		return menuBar;
+	}
+
+	public Container createContentPane() {
+		// Create the content-pane-to-be.
+		JPanel contentPane = new JPanel(new BorderLayout());
+		contentPane.setOpaque(true);
+
+		// Create a scrolled text area.
+		output = new JTextArea(5, 30);
+		output.setEditable(true);
+		scrollPane = new JScrollPane(output);
+
+		// Add the text area to the content pane.
+		contentPane.add(scrollPane, BorderLayout.CENTER);
+		return contentPane;
+	}
+
+	private static void createAndShowGUI() {
+		// Create and set up the window.
+		frame = new JFrame(FrameTitle);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		// Create and set up the content pane.
+		TextDemo demo = new TextDemo();
+		frame.setJMenuBar(demo.createMenuBar());
+		frame.setContentPane(demo.createContentPane());
+		// Display the window.
+		frame.setSize(900, 600);
+		frame.setVisible(true);
+
+	}
+
+	public static void main(String[] args) {
+
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				createAndShowGUI();
+			}
+		});
+	}
+//Abstracct method from action listner Interface
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		JMenuItem source = (JMenuItem) (e.getSource());
+		int returnVal;
+		JFileChooser fileChooser = new JFileChooser();
+		//System.out.println(e.getActionCommand() + " is the Command");
+		if (e.getActionCommand() == "Save As") {
+			expressionSaveAs(fileChooser);
+		} else if (e.getActionCommand() == "Open") {
+			expressionOpen(fileChooser);
+		} else if (e.getActionCommand() == "New") {
+			expressionNew(fileChooser);
+		}
+
+		else if (e.getActionCommand() == "Save") {
+			if (fullpath != null)
+				expressionSave();
+			else
+				JOptionPane.showMessageDialog(null, "Enter Valid Name",
+						"FileName Error: " + "Expression",
+						JOptionPane.INFORMATION_MESSAGE);
+		}
+
+		else if (e.getActionCommand() == "Exit") {
+
+			System.exit(0);
+		} 
+
+	}
+
+	public void expressionNew(JFileChooser fileChooser) {
+		this.output.setText("" + "");
+		frame.setTitle("New - Expression");
+		frame.repaint();
+
+	}
+
+	public void expressionOpen(JFileChooser fileChooser) {
+		int returnVal = fileChooser.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+			try {
+				
+				fullpath = file.getAbsolutePath();
+				this.output.read(new FileReader(fullpath), null);
+				FrameTitle = file.getName() + " -Expression";
+				// Dynamicaly change the title of the Frame depending on the
+				// file
+				frame.setTitle(FrameTitle);
+				frame.repaint();
+
+			} catch (IOException ex) {
+				System.out.println("problem accessing file"
+						+ file.getAbsolutePath());
+			}
+		} else {
+			System.out.println("File access cancelled by user.");
+		}
+	}
+
+	// This method saves text using the current filename
+	public void expressionSave() {
+
+		try {
+			System.out.println("this is the file name : " + fullpath);
+			FileWriter writer = new FileWriter(fullpath);
+			writer.write(this.output.getText());
+			writer.flush();
+
+		} catch (IOException ex) {
+			System.out.println("problem Writing the file: ");
+		}
+
+	}
+
+	// This method saves as the new selected filename
+	public void expressionSaveAs(JFileChooser fileChooser) {
+		int returnVal = fileChooser.showSaveDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+			try {
+				fullpath = file.getAbsolutePath();
+				FrameTitle = fullpath + " -Expression";
+				frame.setTitle(FrameTitle);
+				frame.repaint();
+				FileWriter writer = new FileWriter(fullpath);
+				writer.write(this.output.getText());
+				writer.flush();
+
+			} catch (IOException ex) {
+				System.out.println("problem Writing the file: "
+						+ file.getAbsolutePath());
+			}
+		}
+	}
+
+	
+
+}
